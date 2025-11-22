@@ -3,13 +3,23 @@
 	import gsap from 'gsap';
 	import ScrollTrigger from 'gsap/ScrollTrigger';
 	import { theme, toggleTheme } from '$lib/stores/themeStore';
-	import { walletAddress } from '$lib/stores/walletStore';
+	import { goto } from '$app/navigation';
+	import { walletAddress, isWalletModalOpen } from '$lib/stores/walletStore';
 
 	const navLinks = [
 		{ label: 'How it Works', href: '#how-it-works' },
 		{ label: 'Notes', href: '#notes' },
 		{ label: 'FAQ', href: '#faq' }
 	];
+
+	function handleAppNavigation(e) {
+		e.preventDefault();
+		if ($walletAddress) {
+			goto('/app');
+		} else {
+			isWalletModalOpen.set(true);
+		}
+	}
 
 	const trustBadges = ['Multi-chain', 'Testnet Ready', 'Farmer-first UI'];
 
@@ -19,6 +29,14 @@
 		{ label: 'Testnet', className: 'hero-chip-3' },
 		{ label: 'Perp', className: 'hero-chip-4' }
 	];
+// ... (keeping other constants same, just showing the function addition)
+
+// ... inside template
+// Navbar button
+// <a href="/app" class="btn btn-primary" on:click={handleAppNavigation}>Go to App</a>
+
+// Hero button
+// <a href="/app" class="btn btn-primary btn-hero" on:click={handleAppNavigation}>Go to App</a>
 
 	const benefits = [
 		{
@@ -161,7 +179,7 @@
 	const baseProductLinks = [
 		{ label: 'How It Works', href: '#how-it-works' },
 		{ label: 'Notes', href: '#notes' },
-		{ label: 'Go to App', href: '/app' }
+		{ label: 'Go to App', href: '/app', onClick: true }
 	];
 
 	const defaultProfileSlug = 'farmer';
@@ -346,7 +364,7 @@
 				}
 			});
 
-			gsap.from('.notes-mockup', {
+			gsap.from('.notes-visual', {
 				opacity: 0,
 				x: -40,
 				duration: 0.8,
@@ -462,7 +480,7 @@
 						</svg>
 					{/if}
 				</button>
-				<a href="/app" class="btn btn-primary">Go to App</a>
+				<a href="/app" class="btn btn-primary" on:click={handleAppNavigation}>Go to App</a>
 			</div>
 		</div>
 	</nav>
@@ -475,7 +493,7 @@
 					One cockpit to manage quests, chains, and progress across all your Web3 airdrops.
 				</p>
 				<div class="hero-buttons">
-					<a href="/app" class="btn btn-primary btn-hero">Go to App</a>
+					<a href="/app" class="btn btn-primary btn-hero" on:click={handleAppNavigation}>Go to App</a>
 					<a href={profileHref} class="btn btn-secondary btn-hero">View Profile</a>
 					<a href="#preview" class="btn btn-secondary btn-hero">Watch Demo</a>
 				</div>

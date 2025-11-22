@@ -319,7 +319,12 @@
   <div class="content-grid">
     <!-- LIST AIRDROP -->
     <div id="airdropList">
-      {#if airdropsWithStats.length === 0}
+      {#if $userStore.loading}
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading your quests...</p>
+        </div>
+      {:else if airdropsWithStats.length === 0}
         <div class="empty-state">
           <p>No airdrops found matching your filters.</p>
         </div>
@@ -433,7 +438,7 @@
   <div class="modal-content">
     <div class="modal-header">
       <h2 class="modal-title">Add New Airdrop</h2>
-      <button class="modal-close" type="button" on:click={closeModal}>
+      <button class="modal-close" type="button" on:click={closeModal} aria-label="Close modal">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
           viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -509,3 +514,28 @@
     </form>
   </div>
 </div>
+
+<style>
+    .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem;
+        color: rgba(255, 255, 255, 0.5);
+        gap: 1rem;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: #06b6d4;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>

@@ -234,6 +234,12 @@
 <main class="main-content">
   <!-- Profile Summary Card -->
   <section class="profile-card">
+    {#if $userStore.loading}
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading profile...</p>
+        </div>
+    {:else}
     <div class="profile-content">
       <div class="profile-left">
         <div class="avatar">{getInitials(profile.name || 'Farmer')}</div>
@@ -263,6 +269,7 @@
         </div>
       </div>
     </div>
+    {/if}
   </section>
 
   <!-- Stats & Overview Section -->
@@ -474,3 +481,29 @@
     </div>
   </div>
 {/if}
+
+<style>
+    .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem;
+        color: rgba(255, 255, 255, 0.5);
+        gap: 1rem;
+        width: 100%;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: #06b6d4;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>

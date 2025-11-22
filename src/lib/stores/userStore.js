@@ -1,106 +1,139 @@
-import { writable, derived, get } from 'svelte/store';
-import { browser } from '$app/environment';
+import { writable, derived } from 'svelte/store';
 import { walletAddress } from './walletStore';
-import { airdrop as defaultAirdrops } from '../airdrop';
-
-const STORAGE_KEY = 'airdrop-tracker-user-data';
+import { db } from '../db';
 
 // Initial state structure
 const createInitialState = () => ({
-    users: {} // keyed by wallet address (lowercase)
+    users: {}, // keyed by wallet address (lowercase)
+    loading: false,
+    error: null
 });
 
-// Helper to get default user data
-const createDefaultUserData = (address) => {
-    const shortAddr = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '';
-    return {
-        profile: {
-            name: 'Farmer',
-            role: 'Airdrop Farmer',
-            wallet: address || '',
-            bio: 'Grinding L1, L2, and testnet airdrops.',
-            goals: ''
-        },
-        airdrops: structuredClone(defaultAirdrops).map(a => ({
-            ...a,
-            completedQuests: 0 // Ensure fresh start
-        })),
-        onboardingDismissed: false
-    };
-};
-
 function createUserStore() {
-    const stored = browser ? localStorage.getItem(STORAGE_KEY) : null;
-    const initialState = stored ? JSON.parse(stored) : createInitialState();
-
-    const { subscribe, set, update } = writable(initialState);
+    const { subscribe, set, update } = writable(createInitialState());
 
     return {
         subscribe,
+
+        // Load user data from DB
+        loadUser: async (address) => {
+            if (!address) return;
+            const addr = address.toLowerCase();
+
+            update(s => ({ ...s, loading: true }));
+
+            try {
+                let userData = await db.getUser(addr);
+
+                if (!userData) {
+                    // Create new user if not found
+                    userData = await db.createUser(addr);
+                }
+
+                update(state => {
+                    state.users[addr] = userData;
+                    state.loading = false;
+                    return state;
+                });
+            } catch (err) {
+                console.error("Failed to load user:", err);
+                update(s => ({ ...s, loading: false, error: err.message }));
+            }
+        },
+
         // Update a specific user's profile
-        updateProfile: (address, profileData) => update(state => {
+        updateProfile: async (address, profileData) => {
             const addr = address.toLowerCase();
-            if (!state.users[addr]) {
-                state.users[addr] = createDefaultUserData(addr);
+
+            // Optimistic update
+            update(state => {
+                if (state.users[addr]) {
+                    state.users[addr].profile = { ...state.users[addr].profile, ...profileData };
+                }
+                return state;
+            });
+
+            try {
+                await db.updateProfile(addr, profileData);
+            } catch (err) {
+                console.error("Failed to update profile:", err);
+                // Revert or show error (omitted for simplicity)
             }
-            state.users[addr].profile = { ...state.users[addr].profile, ...profileData };
-            if (browser) localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            return state;
-        }),
+        },
+
         // Update a specific user's airdrop progress
-        updateAirdrop: (address, slug, airdropData) => update(state => {
+        updateAirdrop: async (address, slug, airdropData) => {
             const addr = address.toLowerCase();
-            if (!state.users[addr]) {
-                state.users[addr] = createDefaultUserData(addr);
+
+            // Optimistic update
+            update(state => {
+                if (state.users[addr]) {
+                    const index = state.users[addr].airdrops.findIndex(a => a.slug === slug);
+                    if (index !== -1) {
+                        state.users[addr].airdrops[index] = { ...state.users[addr].airdrops[index], ...airdropData };
+                    }
+                }
+                return state;
+            });
+
+            try {
+                await db.updateAirdrop(addr, slug, airdropData);
+            } catch (err) {
+                console.error("Failed to update airdrop:", err);
             }
-            const index = state.users[addr].airdrops.findIndex(a => a.slug === slug);
-            if (index !== -1) {
-                state.users[addr].airdrops[index] = { ...state.users[addr].airdrops[index], ...airdropData };
-            } else {
-                // If new airdrop (e.g. added manually), push it
-                state.users[addr].airdrops.push(airdropData);
-            }
-            if (browser) localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            return state;
-        }),
+        },
+
         // Add a new airdrop to the user's list
-        addAirdrop: (address, newAirdrop) => update(state => {
+        addAirdrop: async (address, newAirdrop) => {
             const addr = address.toLowerCase();
-            if (!state.users[addr]) {
-                state.users[addr] = createDefaultUserData(addr);
+
+            // Optimistic update
+            update(state => {
+                if (state.users[addr]) {
+                    state.users[addr].airdrops.push(newAirdrop);
+                }
+                return state;
+            });
+
+            try {
+                await db.addAirdrop(addr, newAirdrop);
+            } catch (err) {
+                console.error("Failed to add airdrop:", err);
             }
-            state.users[addr].airdrops.push(newAirdrop);
-            if (browser) localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            return state;
-        }),
+        },
+
         // Set onboarding dismissed
-        dismissOnboarding: (address) => update(state => {
+        dismissOnboarding: async (address) => {
             const addr = address.toLowerCase();
-            if (!state.users[addr]) {
-                state.users[addr] = createDefaultUserData(addr);
+
+            update(state => {
+                if (state.users[addr] && state.users[addr].profile) {
+                    state.users[addr].profile.onboarding_dismissed = true;
+                }
+                return state;
+            });
+
+            try {
+                await db.dismissOnboarding(addr);
+            } catch (err) {
+                console.error("Failed to dismiss onboarding:", err);
             }
-            state.users[addr].onboardingDismissed = true;
-            if (browser) localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            return state;
-        }),
-        // Reset user data (delete profile)
+        },
+
+        // Reset user data (locally only, to clear cache on disconnect if needed)
         resetUser: (address) => update(state => {
+            // We might not want to delete from DB on reset, just clear local state
             const addr = address.toLowerCase();
             if (state.users[addr]) {
                 delete state.users[addr];
             }
-            if (browser) localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             return state;
         }),
-        // Ensure user exists (called when connecting)
-        initUser: (address) => update(state => {
-            const addr = address.toLowerCase();
-            if (!state.users[addr]) {
-                state.users[addr] = createDefaultUserData(addr);
-                if (browser) localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            }
-            return state;
-        })
+
+        // Ensure user exists (called when connecting) - now just an alias for loadUser
+        initUser: async (address) => {
+            return await userStore.loadUser(address);
+        }
     };
 }
 
@@ -112,6 +145,7 @@ export const currentUserData = derived(
     ([$userStore, $walletAddress]) => {
         if (!$walletAddress) return null;
         const addr = $walletAddress.toLowerCase();
-        return $userStore.users[addr] || createDefaultUserData(addr);
+        return $userStore.users[addr] || null; // Return null if not loaded yet
     }
 );
+

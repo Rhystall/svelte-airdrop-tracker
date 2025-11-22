@@ -1442,6 +1442,8 @@ h3 {
 
 .landing-page .orb-ring {
     position: absolute;
+    top: 50%;
+    left: 50%;
     border-radius: 50%;
     border: 1px dashed rgba(255, 255, 255, 0.25);
     animation: orbRotate 12s linear infinite;
@@ -1504,21 +1506,25 @@ h3 {
 .landing-page .pill-left {
     left: 1.5rem;
     top: 65%;
+    animation: float-left 7s ease-in-out infinite;
     animation-delay: 0.5s;
 }
 
 .landing-page .pill-bottom {
     right: 2rem;
     bottom: 2rem;
+    animation: float-bottom 8s ease-in-out infinite;
     animation-delay: 1s;
 }
 
 @keyframes orbPulse {
+
     0%,
     100% {
         transform: translate(-50%, -50%) scale(0.96);
         opacity: 0.85;
     }
+
     50% {
         transform: translate(-50%, -50%) scale(1.04);
         opacity: 1;
@@ -1529,18 +1535,57 @@ h3 {
     from {
         transform: translate(-50%, -50%) rotate(0deg);
     }
+
     to {
         transform: translate(-50%, -50%) rotate(360deg);
     }
 }
 
 @keyframes float {
+
     0%,
     100% {
         transform: translate(var(--tx), var(--ty));
     }
+
     50% {
         transform: translate(var(--tx), calc(var(--ty) - 10px));
+    }
+}
+
+@keyframes float-left {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(5px, -15px);
+    }
+}
+
+@keyframes float-bottom {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(-5px, -15px);
+    }
+}
+
+@keyframes float-complex {
+
+    0%,
+    100% {
+        transform: translate(var(--tx), var(--ty));
+    }
+
+    50% {
+        transform: translate(calc(var(--tx) + 5px), calc(var(--ty) - 15px));
     }
 }
 
@@ -1574,7 +1619,7 @@ h3 {
 }
 
 .landing-page .faq-container {
-    max-width: 800px;
+    max-width: 1024px;
     margin: 0 auto;
 }
 
@@ -1585,6 +1630,11 @@ h3 {
     border-radius: 1rem;
     margin-bottom: 1rem;
     overflow: hidden;
+    transition: border-color 0.3s ease;
+}
+
+.landing-page .faq-item:hover {
+    border-color: rgba(6, 182, 212, 0.5);
 }
 
 .landing-page .faq-question {
