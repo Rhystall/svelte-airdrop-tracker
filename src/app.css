@@ -1505,7 +1505,7 @@ h3 {
 
 .landing-page .pill-left {
     left: 1.5rem;
-    top: 65%;
+    top: 50%;
     animation: float-left 7s ease-in-out infinite;
     animation-delay: 0.5s;
 }
@@ -2775,6 +2775,61 @@ h3 {
 .airdrop-name {
     color: var(--color-text-primary);
     font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .landing-page .notes-visual {
+        min-height: 450px;
+        /* Increase height for mobile to fit stacked pills if needed */
+        padding: 1rem;
+    }
+
+    .landing-page .visual-orb {
+        width: 180px;
+        height: 180px;
+    }
+
+    .landing-page .orb-core {
+        width: 120px;
+        height: 120px;
+    }
+
+    .landing-page .ring-1 {
+        width: 200px;
+        height: 200px;
+    }
+
+    .landing-page .ring-2 {
+        width: 240px;
+        height: 240px;
+    }
+
+    .landing-page .visual-pill {
+        padding: 0.6rem 0.9rem;
+        transform-origin: center;
+    }
+
+    .landing-page .visual-pill strong {
+        font-size: 0.8rem;
+    }
+
+    .landing-page .visual-pill p {
+        font-size: 0.65rem;
+    }
+
+    .landing-page .pill-top {
+        top: 1rem;
+    }
+
+    .landing-page .pill-left {
+        left: 0.5rem;
+        top: 45%;
+    }
+
+    .landing-page .pill-bottom {
+        right: 0.5rem;
+        bottom: 1rem;
+    }
 }
 
 .badge {

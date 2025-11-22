@@ -99,6 +99,14 @@ function createUserStore() {
                 await db.addAirdrop(addr, newAirdrop);
             } catch (err) {
                 console.error("Failed to add airdrop:", err);
+                alert(`Failed to save airdrop: ${err.message || JSON.stringify(err)}`);
+                // Revert optimistic update (optional, but good practice)
+                update(state => {
+                    if (state.users[addr]) {
+                        state.users[addr].airdrops = state.users[addr].airdrops.filter(a => a.slug !== newAirdrop.slug);
+                    }
+                    return state;
+                });
             }
         },
 

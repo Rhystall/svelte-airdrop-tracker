@@ -30,7 +30,15 @@ export const db = {
         // This handles cases where we add new default airdrops later
         const mergedAirdrops = defaultAirdrops.map(def => {
             const existing = airdrops?.find(a => a.slug === def.slug);
-            return existing ? { ...def, ...existing } : { ...def, completed_quests: 0 };
+            if (existing) {
+                // Remove null values from existing to prevent overwriting defaults with nulls
+                // (since default airdrops don't store metadata in DB, only progress)
+                const cleanExisting = Object.fromEntries(
+                    Object.entries(existing).filter(([_, v]) => v !== null)
+                );
+                return { ...def, ...cleanExisting };
+            }
+            return { ...def, completed_quests: 0 };
         });
 
         // Also include any custom airdrops the user might have added that aren't in defaults
@@ -143,15 +151,24 @@ export const db = {
 
     // Add a new airdrop
     addAirdrop: async (address, airdrop) => {
+        // Prepare data for DB (snake_case)
+        const dbData = {
+            user_wallet_address: address,
+            slug: airdrop.slug,
+            name: airdrop.name,
+            chain: airdrop.chain,
+            difficulty: airdrop.difficulty,
+            link: airdrop.link,
+            tags: airdrop.tags,
+            description: airdrop.description,
+            quests: airdrop.quests,
+            completed_quests: airdrop.completedQuests || 0,
+            status: airdrop.status || 'Not Started'
+        };
+
         const { data, error } = await supabase
             .from('user_airdrops')
-            .insert({
-                user_wallet_address: address,
-                slug: airdrop.slug,
-                completed_quests: 0,
-                status: 'Not Started',
-                ...airdrop
-            })
+            .insert(dbData)
             .select()
             .single();
 
