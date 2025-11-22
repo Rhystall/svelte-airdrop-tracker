@@ -1,38 +1,41 @@
-# sv
+# Airdrop Quest Tracker
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Mini project untuk belajar Svelte dan SvelteKit lewat kasus nyata: dashboard sederhana untuk mencatat progress farming airdrop lintas chain.
 
-## Creating a project
+## Tech Stack
+- SvelteKit + Vite
+- GSAP (animasi landing page)
+- WalletConnect v2 (opsional, koneksi dompet/injected)
+- LocalStorage (persisten tema, profil, catatan)
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Fitur
+- Landing page interaktif dengan highlight produk.
+- Dashboard airdrop: filter chain/difficulty, pencarian, dan ringkasan progres.
+- Modal tambah airdrop custom (nama, slug, chain, difficulty, tags, quests).
+- Halaman detail airdrop dengan daftar quest.
+- Halaman profil dengan stats, notes/goals, dan onboarding singkat.
+- Tema terang/gelap yang tersimpan di browser.
+- Koneksi dompet (injected atau WalletConnect) dan persistent session lokal.
 
-```sh
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
+## Menjalankan Proyek
+1) Pastikan Node.js 18+.
+2) Install dependencies:
+```bash
+npm install
 ```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
+3) (Opsional, hanya jika ingin fitur koneksi wallet) Buat `.env`:
+```bash
+VITE_WALLETCONNECT_PROJECT_ID=your_project_id
+```
+4) Jalanan dev server:
+```bash
 npm run dev -- --open
 ```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
+5) Build produksi:
+```bash
+npm run build && npm run preview
 ```
 
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## Catatan
+- Semua data (tema, profil, catatan) disimpan lokal di browser.
+- WalletConnect butuh `VITE_WALLETCONNECT_PROJECT_ID`; tanpa itu, koneksi dompet tidak tersedia.
