@@ -1619,7 +1619,7 @@ h3 {
 }
 
 .landing-page .faq-container {
-    max-width: 1024px;
+    max-width: 1280px;
     margin: 0 auto;
 }
 
@@ -2413,7 +2413,7 @@ h3 {
     color: #ffffff;
     background-color: rgba(239, 68, 68, 0.2);
 }
-}
+
 
 .settings-btn {
     width: 2.5rem;

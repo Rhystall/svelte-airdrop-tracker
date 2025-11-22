@@ -154,15 +154,15 @@
 	const faqs = [
 		{
 			question: 'Is my data stored on-chain?',
-			answer: "No, your data is stored locally in your browser. We don't collect or store any personal information on our servers."
+			answer: "We track on-chain data, but your personal preferences, profile settings, and quest progress are stored locally in your browser. We don't collect or store any personal information on our servers."
 		},
 		{
 			question: 'Do I need to connect a wallet?',
-			answer: 'No wallet connection required! This is a tracking tool that helps you organize your airdrop farming activities.'
+			answer: 'Yes, connecting a wallet is required to track your specific progress, save your profile, and manage your airdrop strategies effectively.'
 		},
 		{
 			question: 'Can I track airdrops on any chain?',
-			answer: 'Yes! You can add custom airdrops from any chain. We support L1, L2, HyperEVM, testnets, and more.'
+			answer: 'Yes! We support tracking across multiple ecosystems including L1s, L2s, HyperEVM, and testnets. You can also add custom airdrops for any chain.'
 		},
 		{
 			question: 'Is this tool free to use?',
@@ -202,11 +202,15 @@
 
 	const currentYear = new Date().getFullYear();
 
-	let activeFaq = -1;
+	let activeFaqs = [];
 	let landingRef;
 
 	function toggleFaq(index) {
-		activeFaq = activeFaq === index ? -1 : index;
+		if (activeFaqs.includes(index)) {
+			activeFaqs = activeFaqs.filter((i) => i !== index);
+		} else {
+			activeFaqs = [...activeFaqs, index];
+		}
 	}
 
 	onMount(() => {
@@ -442,7 +446,7 @@
 
 	<nav class="navbar">
 		<div class="navbar-container">
-			<a href="/landing" class="navbar-logo" aria-label="Airdrop Quest Tracker home">
+			<a href="/" class="navbar-logo" aria-label="Airdrop Quest Tracker home">
 				<div class="logo-icon">
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path
@@ -667,12 +671,12 @@
 			</div>
 			<div class="faq-container">
 				{#each faqs as faq, index}
-					<div class={`faq-item ${activeFaq === index ? 'active' : ''}`}>
+					<div class={`faq-item ${activeFaqs.includes(index) ? 'active' : ''}`}>
 						<button
 							class="faq-question"
 							type="button"
 							on:click={() => toggleFaq(index)}
-							aria-expanded={activeFaq === index}
+							aria-expanded={activeFaqs.includes(index)}
 						>
 							<span>{faq.question}</span>
 							<svg
@@ -687,7 +691,7 @@
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
 							</svg>
 						</button>
-						<div class="faq-answer" aria-hidden={activeFaq !== index}>
+						<div class="faq-answer" aria-hidden={!activeFaqs.includes(index)}>
 							<div class="faq-answer-content">{faq.answer}</div>
 						</div>
 					</div>
@@ -700,7 +704,7 @@
 		<div class="footer-container">
 			<div class="footer-top">
 				<div class="footer-brand">
-					<a href="/landing" class="footer-logo">
+					<a href="/" class="footer-logo">
 						<div class="logo-icon">
 							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								<path
